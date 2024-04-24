@@ -1,8 +1,8 @@
-import { UserController } from '../controllers/index.js'
+import { ProductController } from '../controllers/index.js'
 import { Router } from 'express'
 const router = Router()
 
-const { create, readOne, readAll, updateObj, removeObj } = UserController()
+const { create, readOne, readAll, updateObj, removeObj } = ProductController()
 
 router.route('/')
     .post(create)
@@ -14,4 +14,4 @@ router.route('/:id')
     .delete(removeObj)
 
 export default router;
-export { router as UserRoutes }
+export { router as ProductRoutes }

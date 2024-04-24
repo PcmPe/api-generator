@@ -1,7 +1,6 @@
 //imports
 import { ProdutoModel } from '../models/index.js'
 import { BaseController } from './index.js'
-
 const Product = ProdutoModel()
 
 const ProductController = () => {

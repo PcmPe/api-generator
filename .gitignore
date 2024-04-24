@@ -7,3 +7,5 @@ logs
 pnpm-lock.yaml
 dados_mysql
 ```
+.venv
+__pycache__

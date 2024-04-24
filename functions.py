@@ -15,8 +15,11 @@ def generateModel(modelName):
         f"export {{ {modelName}Model }}\n"
     )
     filePath = path.join(getcwd(), "src", "models", f"_{modelName.lower()}.js")
+    indexPath = path.join(getcwd(), "src", "models", "index.js")
     with open(filePath, 'w') as f:
         f.write(modelCode)
+    with open(indexPath, 'a') as f:
+        f.write(f"\nexport * from './_{modelName.lower()}.js'")
         
 def generateController(modelName):
     controller_code = (
@@ -41,8 +44,11 @@ def generateController(modelName):
         f"export {{ {modelName}Controller }}\n"
     )
     filePath = path.join(getcwd(), "src", "controllers", f"_{modelName.lower()}.js")
+    indexPath = path.join(getcwd(), "src", "controllers", "index.js")
     with open(filePath, 'w') as f:
         f.write(controller_code)
+    with open(indexPath, 'a') as f:
+        f.write(f"\nexport * from './_{modelName.lower()}.js'")
        
 def generateRoute(modelName):
     router_code = (
@@ -61,5 +67,34 @@ def generateRoute(modelName):
         f"export {{ router as {modelName}Routes }};\n"
     )
     filePath = path.join(getcwd(), "src", "routes", f"_{modelName.lower()}.js")
+    indexPath = path.join(getcwd(), "src", "routes", "index.js")
     with open(filePath, 'w') as f:
         f.write(router_code)
+    with open(indexPath, 'a') as f:
+        f.write(f"\nexport * from './_{modelName.lower()}.js'")
+
+def insertRouteIntoIndex(routeName, modelName):
+    new_code = f"app.use('/{routeName}', {modelName}Routes);\n"
+    with open("index.js", "r+") as f:
+        lines = f.readlines()
+        for i, line in enumerate(lines):
+            if "//Routes" in line:
+                lines.insert(i + 1, new_code)
+                f.seek(0)
+                f.writelines(lines)
+                break
+
+def insertImportIntoIndex(modelName):
+    palavra_adicionar = f'{modelName}Routes'
+
+    with open('index.js', 'r') as arquivo:
+        linhas = arquivo.readlines()
+
+    linha_desejada = linhas[5] 
+    nova_linha = linha_desejada.replace('}', f', {palavra_adicionar}' + ' }')
+
+    linhas[5] = nova_linha
+
+    with open('index.js', 'w') as arquivo:
+        arquivo.writelines(linhas)
+    

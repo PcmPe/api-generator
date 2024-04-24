@@ -17,10 +17,10 @@ model usuario {
   @@map("usuarios")
 }
 
-model produto {
+model car {
   id    Int    @id @default(autoincrement())
-  name  String @db.VarChar(255)
-  price String @db.VarChar(255)
+  name  String @db.VarChar(155)
+  brand String @db.VarChar(255)
 
-    @@map("produtos")
+  @@map("carros")
 }

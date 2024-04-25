@@ -1,9 +1,9 @@
 import { BaseModel } from './index.js';
 
-const CarModel = () => {
+const CarroModel = () => {
     const base = BaseModel(
 		{
-        	model: 'car'
+        	model: 'carro'
     	}
 	)
     return {
@@ -11,5 +11,5 @@ const CarModel = () => {
     }
 }
 
-export default { CarModel }
-export { CarModel }
+export default { CarroModel }
+export { CarroModel }

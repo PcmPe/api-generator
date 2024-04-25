@@ -33,7 +33,6 @@ def generateTable(tableName):
     sql_create_table += ");"
     cursor.execute(sql_create_table)
     subprocess.run(["yarn", "prisma", "db", "pull"])
-    subprocess.run(["yarn", "prisma", "generate"])
 
 def generateModel(modelName):
     modelCode = (
@@ -133,3 +132,16 @@ def insertImportIntoIndex(modelName):
     with open('index.js', 'w') as arquivo:
         arquivo.writelines(linhas)
     
+def insertIntoPrismaSchema(tableName, modelName):
+    filepath = path.join(getcwd(), "src", "prisma", "schema.prisma")
+    with open(filepath, 'r') as f:
+        lines = f.readlines()
+
+    for ix, line in enumerate(lines):
+        if f'model {tableName}' in line:
+            lines[ix] = line.replace(f'{tableName}' + ' {', f'{modelName.lower()}' + ' ' + '{' f'\n\t@@map("{tableName}")')
+
+    with open(filepath, 'w') as file:
+        file.writelines(lines)
+        
+    subprocess.run(["yarn", "prisma", "generate"])

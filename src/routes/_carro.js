@@ -1,8 +1,8 @@
-import { CarController } from '../controllers/index.js'
+import { CarroController } from '../controllers/index.js'
 import { Router } from 'express'
 const router = Router()
 
-const { create, readOne, readAll, updateObj, removeObj } = CarController()
+const { create, readOne, readAll, updateObj, removeObj } = CarroController()
 
 router.route('/')
     .post(create)
@@ -14,4 +14,4 @@ router.route('/:id')
     .delete(removeObj)
 
 export default router;
-export { router as CarRoutes };
+export { router as CarroRoutes };

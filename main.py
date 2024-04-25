@@ -1,4 +1,4 @@
-from functions import generateTable ,generateModel, generateController, generateRoute, insertRouteIntoIndex, insertImportIntoIndex
+from functions import generateTable ,generateModel, generateController, generateRoute, insertRouteIntoIndex, insertImportIntoIndex, insertIntoPrismaSchema
 
 tableName = input("Digite o nome da tabela: ")
 modelName = input("Digite o nome do Model: ")
@@ -10,3 +10,4 @@ generateController(modelName=modelName)
 generateRoute(modelName=modelName)
 insertRouteIntoIndex(modelName=modelName, routeName=routeName)
 insertImportIntoIndex(modelName=modelName)
+insertIntoPrismaSchema(tableName=tableName, modelName=modelName)

@@ -40,7 +40,7 @@ def generateModel(modelName):
         f"const {modelName}Model = () => {{\n"
         f"    const base = BaseModel(\n\t\t{{\n"
         f"        \tmodel: '{modelName.lower()}'\n"
-        f"    \t}}\n\t)\n"
+        f"    \t}})\n"
         f"    return {{\n"
         f"        ...base\n"
         f"    }}\n"

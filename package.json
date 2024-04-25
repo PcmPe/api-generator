@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "prisma": {
-    "schema": "/home/mateusin/Desktop/Workspace/Javascript/api-generator/src/prisma/schema.prisma"
+    "schema": "/home/mateusin/Área de Trabalho/Study/api/generator/src/prisma/schema.prisma"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

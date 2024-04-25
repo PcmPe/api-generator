@@ -18,9 +18,9 @@ model usuario {
 }
 
 model car {
-  id    Int    @id @default(autoincrement())
-  name  String @db.VarChar(155)
-  brand String @db.VarChar(255)
+  id    Int     @id @default(autoincrement())
+  name  String? @db.VarChar(255)
+  price String? @db.VarChar(255)
 
   @@map("carros")
 }

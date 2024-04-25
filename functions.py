@@ -1,4 +1,39 @@
 from os import getcwd, path, listdir
+import mysql.connector
+import subprocess
+
+def generateTable(tableName):
+    conn = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="root",
+    database="api-generator"
+    )
+    cursor = conn.cursor()
+    
+    tableRows = int(input("Digite o número de campos dessa tabela: "))
+    
+    tableFields = []
+    for i in range(tableRows):
+        fieldName = input("Digite o nome do campo: ")
+        fieldType = input("Digite o tipo do campo: ")
+        field = {'fieldName': fieldName, 'fieldType': fieldType}
+        tableFields.append(field)
+
+    sql_create_table = f"CREATE TABLE IF NOT EXISTS {tableName} (id INT AUTO_INCREMENT PRIMARY KEY"
+
+    for field in tableFields:
+        nome_field = field['fieldName']
+        if field['fieldType'] == 'text':
+            tipo_campo = 'VARCHAR(255)'
+        elif field['fieldType'] == 'int':
+            tipo_campo = 'INT'
+        sql_create_table += f", {nome_field} {tipo_campo}"
+        
+    sql_create_table += ");"
+    cursor.execute(sql_create_table)
+    subprocess.run(["yarn", "prisma", "db", "pull"])
+    subprocess.run(["yarn", "prisma", "generate"])
 
 def generateModel(modelName):
     modelCode = (

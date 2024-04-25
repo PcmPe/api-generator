@@ -1,4 +1,4 @@
-from os import getcwd, path, listdir
+from os import getcwd, path
 import mysql.connector
 import subprocess
 

@@ -2,36 +2,69 @@ import { prisma } from '../db/index.js'
 
 const BaseModel = ({ model = '' }) => {
 
-    const save = async (params) => {
-        //CASE 1: (1 - N)
-        if (params.connect) {
+    const noRelations = (id, params) => {
+        if (id === null) {
+            return {
+                data: {
+                    ...params
+                }
+            }
+        }
+        if (id) {
+            return {
+                where: {
+                    id: id
+                },
+                data: {
+                    ...params
+                }
+            }
+        }
+    }
+    const oneToManyRelation = (id, params) => {
+        if (id === null) {
             const { connect, relation, ...data } = params
             const dataConnect = connect.map(id => ({ id }))
-            try {
-                const newobj = await prisma[model].create({
-                    data: {
-                        ...data,
-                        [relation]: {
-                            connect: dataConnect
-                        }
+            return {
+                data: {
+                    ...data,
+                    [relation]: {
+                        connect: dataConnect
                     }
-                })
+                }
+            }
+        }
+        if (id) {
+            const { connect, relation, ...data } = params
+            const dataConnect = connect.map(id => ({ id }))
+            return {
+                where: {
+                    id: id
+                },
+                data: {
+                    ...data,
+                    [relation]: {
+                        connect: dataConnect
+                    }
+                }
+            }
+        }
+    }
+    const save = async (params) => {
+        //@Description: Saving one-to-many relation
+        if (params.connect) {
+            try {
+                const newobj = await prisma[model].create(oneToManyRelation(null, params))
                 return newobj
             } catch (error) {
                 console.log(error)
                 throw new Error('Erro ao salvar objeto no banco de dados!')
             }
         }
-        //CASE 2: (N - N)
-        //TODO:
-        //CASE 3: No relations
-        else {
+        //@Description: Saving a table with no relations
+        if (!params.connect) {
             try {
-                const newobj = await prisma[model].create({
-                    data: {
-                        ...params
-                    }
-                })
+                const newobj = await prisma[model].create(noRelations(null, params))
                 return newobj
             } catch (error) {
                 console.log(error)
@@ -77,19 +110,25 @@ const BaseModel = ({ model = '' }) => {
         }
     }
     const update = async (id, params) => {
-        try {
-            const obj = await prisma[model].update({
-                where: {
-                    id: id
-                },
-                data: {
-                    ...params
-                }
-            });
-            return obj;
-        } catch (error) {
-            console.log(error);
-            throw new Error('Erro ao atualizar objeto no banco de dados!')
+        //@Description: Updating one-to-many relation
+        if (params.connect) {
+            try {
+                const obj = await prisma[model].update(oneToManyRelation(id, params));
+                return obj;
+            } catch (error) {
+                console.log(error);
+                throw new Error('Erro ao atualizar objeto no banco de dados!')
+            }
+        }
+        //@Description: Updating a table with no relations
+        if (!params.connect) {
+            try {
+                const obj = await prisma[model].update(noRelations(id, params));
+                return obj;
+            } catch (error) {
+                console.log(error);
+                throw new Error('Erro ao atualizar objeto no banco de dados!')
+            }
         }
     }
     const remove = async (id) => {

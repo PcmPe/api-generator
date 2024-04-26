@@ -30,6 +30,7 @@ const BaseController = ({ save, getOne, getAll, update, remove, getTotalObjects 
             const paginationInfo = {
                 totalPages: totalPages,
                 currentPage: parseInt(page),
+                currentPageObjects: obj.length,
                 totalObjects : totalObjects,
                 pageSize: parseInt(pageSize),
             }

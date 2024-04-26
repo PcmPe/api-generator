@@ -24,3 +24,10 @@ model produto {
 
   @@map("produtos")
 }
+
+model carro {
+	@@map("carros")
+  id    Int     @id @default(autoincrement())
+  name  String? @db.VarChar(255)
+  price String? @db.VarChar(255)
+}

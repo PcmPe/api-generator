@@ -3,7 +3,7 @@ import express from "express";
 import cookieParser from "cookie-parser"
 import { corsOptions } from "./src/configs/index.js"
 import { logger, credentials, verifyJWT } from "./src/middleware/index.js"
-import { UserRoutes, AuthRoutes, ProdutoRoutes } from './src/routes/index.js'
+import { UserRoutes, AuthRoutes, ProdutoRoutes , CarroRoutes } from './src/routes/index.js'
 //TODO: Não importar rota do index? Vale a pena???
 const app = express();
 const PORT = process.env.PORT;
@@ -24,6 +24,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 //Routes
+app.use('/carros', CarroRoutes);
 app.use('/produtos', ProdutoRoutes);
 app.use("/users", UserRoutes);
 app.use("/auth", AuthRoutes);

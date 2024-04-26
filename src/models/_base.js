@@ -28,9 +28,13 @@ const BaseModel = ({ model = '' }) => {
             throw new Error('Erro ao ler objeto no banco de dados!')
         }
     }
-    const getAll = async () => {
+    const getAll = async (page, pageSize) => {
         try {
-            const obj = await prisma[model].findMany()
+            const skip = (page - 1) * pageSize
+            const obj = await prisma[model].findMany({
+                take: pageSize,
+                skip: skip,
+            })
             return obj
         } catch (error) {
             console.log(error)

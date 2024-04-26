@@ -21,7 +21,8 @@ const BaseController = ({ save, getOne, getAll, update, remove }) => {
     }
     const readAll = async (req, res) => {
         try {
-            const obj = await getAll()
+            const { page = 1, pageSize = 10 } = req.query
+            const obj = await getAll(parseInt(page), parseInt(pageSize))
             res.status(200).json(obj)
         } catch (error) {
             console.log(error)

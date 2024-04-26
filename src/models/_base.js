@@ -41,6 +41,15 @@ const BaseModel = ({ model = '' }) => {
             throw new Error('Erro ao ler objetos no banco de dados!')
         }
     }
+    const getTotalObjects = async () => {
+        try {
+            const count = await prisma[model].count();
+            return count
+        } catch (error) {
+            console.log(error)
+            throw new Error('Erro ao obter total de objetos!')
+        }
+    }
     const update = async (id, params) => {
         try {
             const obj = await prisma[model].update({
@@ -75,6 +84,7 @@ const BaseModel = ({ model = '' }) => {
         save,
         getOne,
         getAll,
+        getTotalObjects,
         update,
         remove,
     }

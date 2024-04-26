@@ -9,7 +9,8 @@ const ProdutoController = () => {
             getOne: Produto.getOne,
             getAll: Produto.getAll,
             update: Produto.update,
-            remove: Produto.remove
+            remove: Produto.remove,
+            getTotalObjects: Produto.getTotalObjects,
         }
     )
     return {

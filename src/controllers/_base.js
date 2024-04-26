@@ -1,4 +1,4 @@
-const BaseController = ({ save, getOne, getAll, update, remove }) => {
+const BaseController = ({ save, getOne, getAll, update, remove, getTotalObjects }) => {
 
     const create = async (req, res) => {
         try {
@@ -23,7 +23,17 @@ const BaseController = ({ save, getOne, getAll, update, remove }) => {
         try {
             const { page = 1, pageSize = 10 } = req.query
             const obj = await getAll(parseInt(page), parseInt(pageSize))
-            res.status(200).json(obj)
+
+            const totalObjects = await getTotalObjects()
+            const totalPages = Math.ceil(totalObjects / parseInt(pageSize))
+
+            const paginationInfo = {
+                totalPages: totalPages,
+                currentPage: parseInt(page),
+                totalObjects : totalObjects,
+                pageSize: parseInt(pageSize),
+            }
+            res.status(200).json({ data: obj, pagination: paginationInfo });
         } catch (error) {
             console.log(error)
             res.status(500).json({ error: 'Erro ao buscar todos os objetos' })

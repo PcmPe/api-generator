@@ -28,6 +28,11 @@ def generateTable(tableName):
             tipo_campo = 'VARCHAR(255)'
         elif field['fieldType'] == 'int':
             tipo_campo = 'INT'
+        elif field['fieldType'] == 'bool':
+            tipo_campo = 'BOOLEAN'
+        elif field['fieldType'] == 'float':
+            tipo_campo = 'FLOAT'
+        
         sql_create_table += f", {nome_field} {tipo_campo}"
         
     sql_create_table += ");"

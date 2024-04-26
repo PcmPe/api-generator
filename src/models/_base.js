@@ -3,17 +3,42 @@ import { prisma } from '../db/index.js'
 const BaseModel = ({ model = '' }) => {
 
     const save = async (params) => {
-        try {
-            const newobj = await prisma[model].create({
-                data: {
-                    ...params
-                }
-            })
-            return newobj
-        } catch (error) {
-            console.log(error)
-            throw new Error('Erro ao salvar objeto no banco de dados!')
+        //(1 - N)
+        if (params.connect) {
+            console.log('1-N')
+            const { connect, relation, ...data } = params
+            const dataConnect = connect.map(id => ({ id }))
+            try {
+                const newobj = await prisma[model].create({
+                    data: {
+                        ...data,
+                        [relation]: {
+                            connect: dataConnect
+                        }
+                    }
+                })
+                return newobj
+            } catch (error) {
+                console.log(error)
+                throw new Error('Erro ao salvar objeto no banco de dados!')
+            }
         }
+        //No relations
+        else {
+            console.log('No relations')
+            try {
+                const newobj = await prisma[model].create({
+                    data: {
+                        ...params
+                    }
+                })
+                return newobj
+            } catch (error) {
+                console.log(error)
+                throw new Error('Erro ao salvar objeto no banco de dados!')
+            }
+        }
+
     }
     const getOne = async (id) => {
         try {
@@ -34,6 +59,8 @@ const BaseModel = ({ model = '' }) => {
             const obj = await prisma[model].findMany({
                 take: pageSize,
                 skip: skip,
+                include: {
+                }
             })
             return obj
         } catch (error) {

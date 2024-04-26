@@ -4,8 +4,7 @@ const ProdutoModel = () => {
     const base = BaseModel(
 		{
         	model: 'produto'
-    	}
-	)
+    	})
     return {
         ...base
     }

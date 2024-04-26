@@ -1,4 +1,4 @@
-const BaseController = ({ save, getOne, getAll, update, remove, getTotalObjects }) => {
+const BaseController = ({ save, getOne, getAll, getTotalObjects, update, remove }) => {
 
     const create = async (req, res) => {
         try {
@@ -28,11 +28,9 @@ const BaseController = ({ save, getOne, getAll, update, remove, getTotalObjects 
             const totalPages = Math.ceil(totalObjects / parseInt(pageSize))
 
             const paginationInfo = {
+                page: parseInt(page),
                 totalPages: totalPages,
-                currentPage: parseInt(page),
-                currentPageObjects: obj.length,
-                totalObjects : totalObjects,
-                pageSize: parseInt(pageSize),
+                rowCount : totalObjects,
             }
             res.status(200).json({ data: obj, pagination: paginationInfo });
         } catch (error) {

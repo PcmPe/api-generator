@@ -18,16 +18,21 @@ model usuario {
 }
 
 model produto {
-  id    Int     @id @default(autoincrement())
-  name  String? @db.VarChar(255)
-  price String? @db.VarChar(255)
+  id           Int           @id @default(autoincrement())
+  nome         String        @db.VarChar(100)
+  descricao    String?       @db.VarChar(100)
+  preco        String        @db.VarChar(100)
+  ingredientes ingrediente[]
 
   @@map("produtos")
 }
 
-model carro {
-	@@map("carros")
-  id    Int     @id @default(autoincrement())
-  name  String? @db.VarChar(255)
-  price String? @db.VarChar(255)
+model ingrediente {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.VarChar(100)
+  produto_id Int?
+  frutas     produto? @relation(fields: [produto_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ingredientes_ibfk_1")
+
+  @@index([produto_id], map: "produto_id")
+  @@map("ingredientes")
 }

@@ -3,9 +3,8 @@ import { prisma } from '../db/index.js'
 const BaseModel = ({ model = '' }) => {
 
     const save = async (params) => {
-        //(1 - N)
+        //CASE 1: (1 - N)
         if (params.connect) {
-            console.log('1-N')
             const { connect, relation, ...data } = params
             const dataConnect = connect.map(id => ({ id }))
             try {
@@ -23,9 +22,10 @@ const BaseModel = ({ model = '' }) => {
                 throw new Error('Erro ao salvar objeto no banco de dados!')
             }
         }
-        //No relations
+        //CASE 2: (N - N)
+        //TODO:
+        //CASE 3: No relations
         else {
-            console.log('No relations')
             try {
                 const newobj = await prisma[model].create({
                     data: {
@@ -53,14 +53,13 @@ const BaseModel = ({ model = '' }) => {
             throw new Error('Erro ao ler objeto no banco de dados!')
         }
     }
-    const getAll = async (page, pageSize) => {
+    const getAll = async (page, pageSize, include) => {
         try {
             const skip = (page - 1) * pageSize
             const obj = await prisma[model].findMany({
                 take: pageSize,
                 skip: skip,
-                include: {
-                }
+                include: include
             })
             return obj
         } catch (error) {

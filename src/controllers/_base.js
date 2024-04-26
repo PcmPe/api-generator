@@ -1,4 +1,4 @@
-const BaseController = ({ save, getOne, getAll, getTotalObjects, update, remove }) => {
+const BaseController = ({ save, getOne, getAll, getTotalObjects, update, remove, include}) => {
 
     const create = async (req, res) => {
         try {
@@ -22,7 +22,7 @@ const BaseController = ({ save, getOne, getAll, getTotalObjects, update, remove 
     const readAll = async (req, res) => {
         try {
             const { page = 1, pageSize = 10 } = req.query
-            const obj = await getAll(parseInt(page), parseInt(pageSize))
+            const obj = await getAll(parseInt(page), parseInt(pageSize), include)
 
             const totalObjects = await getTotalObjects()
             const totalPages = Math.ceil(totalObjects / parseInt(pageSize))

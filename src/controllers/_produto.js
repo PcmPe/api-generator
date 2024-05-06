@@ -3,7 +3,7 @@ import { BaseController } from './index.js'
 const Produto = ProdutoModel()
 
 const ProdutoController = () => {
-    const include = {}
+    const include = { produtos_ingredientes: true }
     const base = BaseController(
         {
             save: Produto.save,

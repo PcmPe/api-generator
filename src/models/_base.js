@@ -1,3 +1,4 @@
+import { id } from 'date-fns/locale'
 import { prisma } from '../db/index.js'
 
 const BaseModel = ({ model = '', junctionTable = null }) => {
@@ -50,18 +51,32 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
             }
         }
     }
-    const manyToManyRelation = (params) => {
-        const { relation, modelTwo, modelTwoID, ...data } = params
-        console.log({ relation, modelTwo, modelTwoID, data })
-        return {
-            data: {
-                ...data,
-                [relation]: {
-                    create: {
-                        [modelTwo]: {
-                            connect: { id: modelTwoID }
+    const manyToManyRelation = (id, params) => {
+        if (id === null) {
+            const { relation, modelTwo, modelTwoID, ...data } = params
+            console.log({ relation, modelTwo, modelTwoID, data })
+            return {
+                data: {
+                    ...data,
+                    [relation]: {
+                        create: {
+                            [modelTwo]: {
+                                connect: { id: modelTwoID }
+                            }
                         }
                     }
+                }
+            }
+        }
+        if (id !== null) {
+            const { relation, modelTwo, modelTwoID, ...data } = params
+            console.log({ relation, modelTwo, modelTwoID, data })
+            return {
+                where: {
+                    id: id
+                },
+                data: {
+                    ...data,
                 }
             }
         }
@@ -81,7 +96,7 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
         //@Description: Saving many-to-many relation
         if (params.modelTwo) {
             try {
-                const newobj = await prisma[model].create(manyToManyRelation(params))
+                const newobj = await prisma[model].create(manyToManyRelation(null, params))
                 return newobj
             } catch (error) {
                 console.log(error)
@@ -109,12 +124,13 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
             }
         }
     }
-    const getOne = async (id) => {
+    const getOne = async (id, include) => {
         try {
             const obj = await prisma[model].findFirst({
                 where: {
                     id: id
                 },
+                include: include
             })
             return obj
         } catch (error) {
@@ -137,6 +153,16 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
         }
     }
     const update = async (id, params) => {
+        //@Description: Updating many-to-many relation
+        if (params.modelTwo) {
+            try {
+                const newobj = await prisma[model].update(manyToManyRelation(id, params))
+                return newobj
+            } catch (error) {
+                console.log(error)
+                throw new Error('Erro ao atualizar objeto no banco de dados!')
+            }
+        }
         //@Description: Updating one-to-many relation
         if (params.connect) {
             try {

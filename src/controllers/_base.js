@@ -1,4 +1,4 @@
-const BaseController = ({ save, getOne, getAll, getTotalObjects, update, remove, include}) => {
+const BaseController = ({ save, getOne, getAll, getTotalObjects, update, remove, include }) => {
 
     const create = async (req, res) => {
         try {
@@ -12,7 +12,7 @@ const BaseController = ({ save, getOne, getAll, getTotalObjects, update, remove,
     const readOne = async (req, res) => {
         const { id } = req.params
         try {
-            const obj = await getOne(parseInt(id))
+            const obj = await getOne(parseInt(id), include)
             res.status(200).json(obj)
         } catch (error) {
             console.log(error)
@@ -31,7 +31,7 @@ const BaseController = ({ save, getOne, getAll, getTotalObjects, update, remove,
             const paginationInfo = {
                 page: parseInt(page),
                 totalPages: totalPages,
-                rowCount : totalObjects,
+                rowCount: totalObjects,
             }
             res.status(200).json({ data: obj, pagination: paginationInfo });
         } catch (error) {

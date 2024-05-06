@@ -3,6 +3,7 @@ import { BaseController } from './index.js'
 const Ingrediente = IngredienteModel()
 
 const IngredienteController = () => {
+    const include = {}
     const base = BaseController(
         {
             save: Ingrediente.save,
@@ -11,6 +12,7 @@ const IngredienteController = () => {
             update: Ingrediente.update,
             remove: Ingrediente.remove,
             getTotalObjects: Ingrediente.getTotalObjects,
+            include: include,
         }
     )
     return {

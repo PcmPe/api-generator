@@ -1,6 +1,6 @@
 from functions import generateTable ,generateModel, generateController, generateRoute, insertRouteIntoIndex, insertImportIntoIndex, insertIntoPrismaSchema
 
-tableName = input("Digite o nome da tabela: ")
+# tableName = input("Digite o nome da tabela: ")
 modelName = input("Digite o nome do Model: ")
 routeName = input("Digite o nome da Rota: ")
 

@@ -21,6 +21,7 @@ const BaseController = ({ save, getOne, getAll, getTotalObjects, update, remove,
     }
     const readAll = async (req, res) => {
         try {
+            //TODO: Remover isso daqui e criar um ReadPage
             const { page = 1, pageSize = 10 } = req.query
             const obj = await getAll(parseInt(page), parseInt(pageSize), include)
 
@@ -55,7 +56,7 @@ const BaseController = ({ save, getOne, getAll, getTotalObjects, update, remove,
             res.status(200).json(obj);
         } catch (error) {
             console.log(error);
-            res.status(500).json({ error: 'Erro ao excluir usuário' });
+            res.status(500).json({ error: 'Erro ao excluir objeto no banco de dados!' });
         }
     }
 

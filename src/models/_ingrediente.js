@@ -3,7 +3,8 @@ import { BaseModel } from './index.js';
 const IngredienteModel = () => {
     const base = BaseModel(
 		{
-        	model: 'ingrediente'
+        	model: 'ingrediente',
+            junctionTable: 'produtoIngrediente'
     	})
     return {
         ...base

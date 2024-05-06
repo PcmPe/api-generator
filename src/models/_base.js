@@ -1,6 +1,6 @@
 import { prisma } from '../db/index.js'
 
-const BaseModel = ({ model = '' }) => {
+const BaseModel = ({ model = '', junctionTable = null }) => {
 
     const noRelations = (id, params) => {
         if (id === null) {
@@ -50,7 +50,44 @@ const BaseModel = ({ model = '' }) => {
             }
         }
     }
+    const manyToManyRelation = (params) => {
+        const { relation, modelTwo, modelTwoID, ...data } = params
+        console.log({ relation, modelTwo, modelTwoID, data })
+        return {
+            data: {
+                ...data,
+                [relation]: {
+                    create: {
+                        [modelTwo]: {
+                            connect: { id: modelTwoID }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    const getTotalObjects = async () => {
+        try {
+            const count = await prisma[model].count();
+            return count
+        } catch (error) {
+            console.log(error)
+            throw new Error('Erro ao obter total de objetos!')
+        }
+    }
+
     const save = async (params) => {
+        //@Description: Saving many-to-many relation
+        if (params.modelTwo) {
+            try {
+                const newobj = await prisma[model].create(manyToManyRelation(params))
+                return newobj
+            } catch (error) {
+                console.log(error)
+                throw new Error('Erro ao salvar objeto no banco de dados!')
+            }
+        }
         //@Description: Saving one-to-many relation
         if (params.connect) {
             try {
@@ -62,7 +99,7 @@ const BaseModel = ({ model = '' }) => {
             }
         }
         //@Description: Saving a table with no relations
-        if (!params.connect) {
+        if (!params.connect && !params.relation) {
             try {
                 const newobj = await prisma[model].create(noRelations(null, params))
                 return newobj
@@ -71,7 +108,6 @@ const BaseModel = ({ model = '' }) => {
                 throw new Error('Erro ao salvar objeto no banco de dados!')
             }
         }
-
     }
     const getOne = async (id) => {
         try {
@@ -100,15 +136,6 @@ const BaseModel = ({ model = '' }) => {
             throw new Error('Erro ao ler objetos no banco de dados!')
         }
     }
-    const getTotalObjects = async () => {
-        try {
-            const count = await prisma[model].count();
-            return count
-        } catch (error) {
-            console.log(error)
-            throw new Error('Erro ao obter total de objetos!')
-        }
-    }
     const update = async (id, params) => {
         //@Description: Updating one-to-many relation
         if (params.connect) {
@@ -133,17 +160,33 @@ const BaseModel = ({ model = '' }) => {
     }
     const remove = async (id) => {
         try {
-            const obj = await prisma[model].delete({
-                where: {
-                    id: id
-                }
-            });
-            return obj;
+            if (junctionTable === null) {
+                const obj = await prisma[model].delete({
+                    where: {
+                        id: id
+                    }
+                })
+                return obj
+            }
+            if (junctionTable !== null) {
+                const idFk = `id_${model}`
+                await prisma[junctionTable].deleteMany({
+                    where: {
+                        [idFk]: id
+                    }
+                })
+                const obj = await prisma[model].delete({
+                    where: {
+                        id: id
+                    }
+                })
+                return obj
+            }
         } catch (error) {
-            console.log(error);
+            console.log(error)
             throw new Error('Erro ao deleter objeto no banco de dados!')
         }
-    };
+    }
 
     return {
         save,
@@ -154,6 +197,5 @@ const BaseModel = ({ model = '' }) => {
         remove,
     }
 }
-
 export default BaseModel
 export { BaseModel }

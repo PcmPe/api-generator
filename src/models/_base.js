@@ -1,4 +1,3 @@
-import { id } from 'date-fns/locale'
 import { prisma } from '../db/index.js'
 
 const BaseModel = ({ model = '', junctionTable = null }) => {
@@ -81,7 +80,6 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
             }
         }
     }
-
     const getTotalObjects = async () => {
         try {
             const count = await prisma[model].count();

@@ -4,7 +4,7 @@ const ProdutoModel = () => {
     const base = BaseModel(
         {
             model: 'produto',
-            junctionTable: 'produtoIngrediente'
+            junctionTable: 'produtos_ingredientes'
         })
     return {
         ...base

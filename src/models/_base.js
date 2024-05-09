@@ -2,6 +2,16 @@ import { prisma } from '../db/index.js'
 
 const BaseModel = ({ model = '', junctionTable = null }) => {
 
+    const getTotalObjects = async () => {
+        try {
+            const count = await prisma[model].count();
+            return count
+        } catch (error) {
+            console.log(error)
+            throw new Error('Erro ao obter total de objetos!')
+        }
+    }
+
     const noRelations = (id, params) => {
         if (id === null) {
             return {
@@ -50,7 +60,7 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
             }
         }
     }
-    const manyToManyRelation = (id, params) => {
+    const manyToManyRelation = async (id, params) => {
         if (id === null) {
             const { relation, modelTwo, modelTwoID, ...data } = params
             console.log({ relation, modelTwo, modelTwoID, data })
@@ -67,26 +77,22 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
                 }
             }
         }
-        if (id !== null) {
-            const { relation, modelTwo, modelTwoID, ...data } = params
-            console.log({ relation, modelTwo, modelTwoID, data })
-            return {
+        if (id !== null && params.mainModel) {
+            const { mainModel, mainModelName, idToUpdate, idToUpdateName } = params
+            const obj = await prisma[model].findFirst({
                 where: {
-                    id: id
+                    [mainModelName]: Number(mainModel)
+                }
+            })
+            const objUpdated = await prisma[model].update({
+                where: {
+                    id: obj.id
                 },
                 data: {
-                    ...data,
+                    [idToUpdateName]: Number(idToUpdate)
                 }
-            }
-        }
-    }
-    const getTotalObjects = async () => {
-        try {
-            const count = await prisma[model].count();
-            return count
-        } catch (error) {
-            console.log(error)
-            throw new Error('Erro ao obter total de objetos!')
+            })
+            return objUpdated
         }
     }
 
@@ -152,10 +158,12 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
     }
     const update = async (id, params) => {
         //@Description: Updating many-to-many relation
-        if (params.modelTwo) {
+        if (params.mainModel) {
+            console.log('update certo')
             try {
-                const newobj = await prisma[model].update(manyToManyRelation(id, params))
-                return newobj
+                const updatedObject = await manyToManyRelation(id, params)
+                if (updatedObject.id) delete updatedObject.id
+                return updatedObject
             } catch (error) {
                 console.log(error)
                 throw new Error('Erro ao atualizar objeto no banco de dados!')
@@ -172,7 +180,7 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
             }
         }
         //@Description: Updating a table with no relations
-        if (!params.connect) {
+        if (!params.connect && !params.mainModel) {
             try {
                 const obj = await prisma[model].update(noRelations(id, params));
                 return obj;

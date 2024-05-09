@@ -1,6 +1,6 @@
 import { prisma } from '../db/index.js'
 
-const BaseModel = ({ model = '', junctionTable = null }) => {
+const BaseModel = ({ model = '', junctionTableModel = null }) => {
 
     const getTotalObjects = async () => {
         try {
@@ -13,14 +13,14 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
     }
 
     const noRelations = (id, params) => {
-        if (id === null) {
+        if (id === "create") {
             return {
                 data: {
                     ...params
                 }
             }
         }
-        if (id) {
+        if (id !== "create") {
             return {
                 where: {
                     id: id
@@ -32,7 +32,7 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
         }
     }
     const oneToManyRelation = (id, params) => {
-        if (id === null) {
+        if (id === "create") {
             const { connect, relation, ...data } = params
             const dataConnect = connect.map(id => ({ id }))
             return {
@@ -44,7 +44,7 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
                 }
             }
         }
-        if (id) {
+        if (id !== "create") {
             const { connect, relation, ...data } = params
             const dataConnect = connect.map(id => ({ id }))
             return {
@@ -61,27 +61,31 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
         }
     }
     const manyToManyRelation = async (id, params) => {
-        if (id === null) {
-            const { relation, modelTwo, modelTwoID, ...data } = params
-            console.log({ relation, modelTwo, modelTwoID, data })
-            return {
+        if (id === "create") {
+            const { modelRelated, associationTable, connect, type, method, ...data } = params
+            const dataConnect = connect.map(id => ({ id }))
+            console.log({ modelRelated, associationTable, dataConnect, type, data })
+
+            //TODO: ADICIONAR SUPORTE PARA VARIAS TABELAS DE LIGACOES RELACIONADO AO MESMO
+            const obj = await prisma.produto.create({
                 data: {
                     ...data,
-                    [relation]: {
-                        create: {
-                            [modelTwo]: {
-                                connect: { id: modelTwoID }
+                    [associationTable]: {
+                        create: dataConnect.map(item => ({
+                            [modelRelated]: {
+                                connect: item
                             }
-                        }
+                        })),
                     }
                 }
-            }
+            })
+            return obj
         }
-        if (id !== null && params.mainModel) {
-            const { mainModel, mainModelName, idToUpdate, idToUpdateName } = params
+        if (id !== "create") {
+            const { modelId, modelField, connectId, connectField } = params
             const obj = await prisma[model].findFirst({
                 where: {
-                    [mainModelName]: Number(mainModel)
+                    [modelField]: Number(modelId)
                 }
             })
             const objUpdated = await prisma[model].update({
@@ -89,7 +93,7 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
                     id: obj.id
                 },
                 data: {
-                    [idToUpdateName]: Number(idToUpdate)
+                    [connectField]: Number(connectId)
                 }
             })
             return objUpdated
@@ -98,9 +102,9 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
 
     const save = async (params) => {
         //@Description: Saving many-to-many relation
-        if (params.modelTwo) {
+        if (params.type === "N-N" && params.method === "create") {
             try {
-                const newobj = await prisma[model].create(manyToManyRelation(null, params))
+                const newobj = await manyToManyRelation("create", params)
                 return newobj
             } catch (error) {
                 console.log(error)
@@ -108,9 +112,9 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
             }
         }
         //@Description: Saving one-to-many relation
-        if (params.connect) {
+        if (params.type === "1-N" && params.method === "create") {
             try {
-                const newobj = await prisma[model].create(oneToManyRelation(null, params))
+                const newobj = await prisma[model].create(oneToManyRelation("create", params))
                 return newobj
             } catch (error) {
                 console.log(error)
@@ -118,9 +122,9 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
             }
         }
         //@Description: Saving a table with no relations
-        if (!params.connect && !params.relation) {
+        if (!params.type && params.method === "create") {
             try {
-                const newobj = await prisma[model].create(noRelations(null, params))
+                const newobj = await prisma[model].create(noRelations("create", params))
                 return newobj
             } catch (error) {
                 console.log(error)
@@ -158,8 +162,7 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
     }
     const update = async (id, params) => {
         //@Description: Updating many-to-many relation
-        if (params.mainModel) {
-            console.log('update certo')
+        if (params.type === "N-N" && params.method === "update") {
             try {
                 const updatedObject = await manyToManyRelation(id, params)
                 if (updatedObject.id) delete updatedObject.id
@@ -170,7 +173,7 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
             }
         }
         //@Description: Updating one-to-many relation
-        if (params.connect) {
+        if (params.type === "1-N" && params.method === "update") {
             try {
                 const obj = await prisma[model].update(oneToManyRelation(id, params));
                 return obj;
@@ -180,7 +183,7 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
             }
         }
         //@Description: Updating a table with no relations
-        if (!params.connect && !params.mainModel) {
+        if (!params.type && params.method === "update") {
             try {
                 const obj = await prisma[model].update(noRelations(id, params));
                 return obj;
@@ -192,7 +195,7 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
     }
     const remove = async (id) => {
         try {
-            if (junctionTable === null) {
+            if (junctionTableModel === null) {
                 const obj = await prisma[model].delete({
                     where: {
                         id: id
@@ -200,9 +203,10 @@ const BaseModel = ({ model = '', junctionTable = null }) => {
                 })
                 return obj
             }
-            if (junctionTable !== null) {
+            if (junctionTableModel !== null) {
                 const idFk = `id_${model}`
-                await prisma[junctionTable].deleteMany({
+                console.log(idFk)
+                await prisma[junctionTableModel].deleteMany({
                     where: {
                         [idFk]: id
                     }

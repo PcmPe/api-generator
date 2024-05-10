@@ -83,20 +83,25 @@ const BaseModel = ({ model = '', junctionTableModel = null }) => {
         }
         if (id !== "create") {
             const { modelId, modelField, connectId, connectField } = params
-            const obj = await prisma[model].findFirst({
+            const objs = await prisma[model].findMany({
                 where: {
                     [modelField]: Number(modelId)
                 }
             })
-            const objUpdated = await prisma[model].update({
-                where: {
-                    id: obj.id
-                },
-                data: {
-                    [connectField]: Number(connectId)
-                }
-            })
-            return objUpdated
+            const arrResponse = []
+            for (const ix in objs) {
+                const objUpdated = await prisma[model].update({
+                    where: {
+                        id: objs[ix].id
+                    },
+                    data: {
+                        [connectField]: connectId[ix]
+                    }
+                })
+                if (objUpdated.id) delete objUpdated.id
+                arrResponse.push(objUpdated)
+            }
+            return { data: arrResponse, message: "Update concluído com sucesso!" }
         }
     }
 
@@ -140,7 +145,8 @@ const BaseModel = ({ model = '', junctionTableModel = null }) => {
                 },
                 include: include
             })
-            return obj
+            if (obj) return obj
+            else return { message: 'Objeto não encontrado no banco de dados!' }
         } catch (error) {
             console.log(error)
             throw new Error('Erro ao ler objeto no banco de dados!')
@@ -154,7 +160,8 @@ const BaseModel = ({ model = '', junctionTableModel = null }) => {
                 skip: skip,
                 include: include
             })
-            return obj
+            if (obj) return obj
+            else return { message: 'Não há registros de objetos no banco de dados' }
         } catch (error) {
             console.log(error)
             throw new Error('Erro ao ler objetos no banco de dados!')
@@ -205,7 +212,6 @@ const BaseModel = ({ model = '', junctionTableModel = null }) => {
             }
             if (junctionTableModel !== null) {
                 const idFk = `id_${model}`
-                console.log(idFk)
                 await prisma[junctionTableModel].deleteMany({
                     where: {
                         [idFk]: id

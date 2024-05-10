@@ -4,3 +4,4 @@ export * from './_produto.js'
 export * from './_ingrediente.js'
 
 export * from './_produtoIngrediente.js'
+export * from './_produtosIngredientes.js'

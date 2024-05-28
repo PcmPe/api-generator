@@ -50,7 +50,6 @@ const BaseController = ({ save, getOne, getAll, getTotalObjects, update, remove,
         }
     }
     const removeObj = async (req, res) => {
-        console.log('delete')
         const { id } = req.params;
         try {
             const obj = await remove(parseInt(id))

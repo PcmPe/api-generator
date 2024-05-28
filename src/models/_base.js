@@ -11,24 +11,26 @@ const BaseModel = ({ model = '', junctionTableModel = null }) => {
             throw new Error('Erro ao obter total de objetos!')
         }
     }
-
-    const noRelations = (id, params) => {
+    const noRelations = async (id, params) => {
+        if ('method' in params) delete params.method
         if (id === "create") {
-            return {
+            const obj = await prisma[model].create({
                 data: {
                     ...params
                 }
-            }
+            })
+            return obj
         }
         if (id !== "create") {
-            return {
+            const obj = await prisma[model].update({
                 where: {
                     id: id
                 },
                 data: {
                     ...params
                 }
-            }
+            })
+            return obj
         }
     }
     const oneToManyRelation = (id, params) => {
@@ -64,7 +66,6 @@ const BaseModel = ({ model = '', junctionTableModel = null }) => {
         if (id === "create") {
             const { modelRelated, associationTable, connect, type, method, ...data } = params
             const dataConnect = connect.map(id => ({ id }))
-            console.log({ modelRelated, associationTable, dataConnect, type, data })
 
             //TODO: ADICIONAR SUPORTE PARA VARIAS TABELAS DE LIGACOES RELACIONADO AO MESMO
             const obj = await prisma.produto.create({
@@ -105,6 +106,7 @@ const BaseModel = ({ model = '', junctionTableModel = null }) => {
         }
     }
 
+    //Services
     const save = async (params) => {
         //@Description: Saving many-to-many relation
         if (params.type === "N-N" && params.method === "create") {
@@ -129,7 +131,7 @@ const BaseModel = ({ model = '', junctionTableModel = null }) => {
         //@Description: Saving a table with no relations
         if (!params.type && params.method === "create") {
             try {
-                const newobj = await prisma[model].create(noRelations("create", params))
+                const newobj = await noRelations("create", params)
                 return newobj
             } catch (error) {
                 console.log(error)
@@ -153,6 +155,7 @@ const BaseModel = ({ model = '', junctionTableModel = null }) => {
         }
     }
     const getAll = async (page, pageSize, include) => {
+        //TODO: IF TIVER NADA
         try {
             const skip = (page - 1) * pageSize
             const obj = await prisma[model].findMany({
@@ -192,7 +195,7 @@ const BaseModel = ({ model = '', junctionTableModel = null }) => {
         //@Description: Updating a table with no relations
         if (!params.type && params.method === "update") {
             try {
-                const obj = await prisma[model].update(noRelations(id, params));
+                const obj = await noRelations(id, params)
                 return obj;
             } catch (error) {
                 console.log(error);
